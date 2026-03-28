@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paradoxul Economisirii — Keynes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #ffffff;
+    color: #1a1a1a;
+    padding: 24px 20px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #EEEDFE;
+    color: #3C3489;
+    margin-bottom: 12px;
+    letter-spacing: 0.03em;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .slider-label {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 8px;
+  }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: #e0e0e0;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #1D9E75;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #1D9E75;
+  }
+
+  .slider-val {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    min-width: 42px;
+    text-align: right;
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .metric {
+    background: #f7f7f5;
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+
+  .metric-label {
+    font-size: 11px;
+    color: #999;
+    margin-bottom: 4px;
+  }
+
+  .metric-value {
+    font-size: 20px;
+    font-weight: 600;
+    transition: color 0.3s;
+  }
+  .ok  { color: #3B6D11; }
+  .warn{ color: #854F0B; }
+  .bad { color: #A32D2D; }
+
+  .flows {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .fb {
+    flex: 1;
+    padding: 7px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    text-align: center;
+    border: 1px solid;
+  }
+
+  .fa { font-size: 14px; color: #aaa; flex-shrink: 0; }
+
+  .fg { background: #EAF3DE; border-color: #639922; color: #3B6D11; }
+  .fr { background: #FCEBEB; border-color: #E24B4A; color: #791F1F; }
+
+  .insight {
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.7;
+    border-left: 3px solid;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .i-good { background: #E1F5EE; border-color: #1D9E75; color: #085041; }
+  .i-key  { background: #EEEDFE; border-color: #534AB7; color: #26215C; }
+  .i-bad  { background: #FCEBEB; border-color: #E24B4A; color: #791F1F; }
+
+  .footer {
+    margin-top: 24px;
+    font-size: 11px;
+    color: #bbb;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<span class="tag">Paradox Keynesian — 1936</span>
+<h1>Paradoxul economisirii</h1>
+<p class="subtitle">Ce se întâmplă când tot mai mulți oameni decid simultan să economisească mai mult?</p>
+
+<div class="slider-label">% din populație care economisește simultan</div>
+<div class="slider-row">
+  <input type="range" min="0" max="100" value="10" step="10" id="sl" oninput="update()">
+  <span class="slider-val" id="sl-out">10%</span>
+</div>
+
+<div class="metrics">
+  <div class="metric"><div class="metric-label">Consum total</div><div class="metric-value" id="m-consum">−6%</div></div>
+  <div class="metric"><div class="metric-label">PIB estimat</div><div class="metric-value" id="m-pib">−4%</div></div>
+  <div class="metric"><div class="metric-label">Șomaj</div><div class="metric-value" id="m-somaj">+3%</div></div>
+</div>
+
+<div class="flows" id="flows"></div>
+<div class="insight" id="insight"></div>
+
+<div class="footer">Newsletter economic · Paradoxul Economisirii · Keynes, Teoria Generală (1936)</div>
+
+<script>
+function update() {
+  const v = parseInt(document.getElementById('sl').value);
+  document.getElementById('sl-out').textContent = v + '%';
+
+  const consumDrop = Math.round(v * 0.55);
+  const pibDrop    = Math.round(v * 0.35);
+  const somaj      = Math.round(v * 0.25);
+
+  const mC = document.getElementById('m-consum');
+  const mP = document.getElementById('m-pib');
+  const mS = document.getElementById('m-somaj');
+
+  mC.textContent = '−' + consumDrop + '%';
+  mC.className = 'metric-value ' + (consumDrop > 30 ? 'bad' : consumDrop > 10 ? 'warn' : 'ok');
+  mP.textContent = '−' + pibDrop + '%';
+  mP.className = 'metric-value ' + (pibDrop > 20 ? 'bad' : pibDrop > 8 ? 'warn' : 'ok');
+  mS.textContent = '+' + somaj + '%';
+  mS.className = 'metric-value ' + (somaj > 15 ? 'bad' : somaj > 6 ? 'warn' : 'ok');
+
+  const flowsEl   = document.getElementById('flows');
+  const insightEl = document.getElementById('insight');
+
+  if (v <= 10) {
+    flowsEl.innerHTML = `
+      <div class="flow">
+        <div class="fb fg">Oamenii cheltuiesc normal</div>
+        <div class="fa">→</div>
+        <div class="fb fg">Banii circulă</div>
+        <div class="fa">→</div>
+        <div class="fb fg">Economia funcționează</div>
+      </div>`;
+    insightEl.className = 'insight i-good';
+    insightEl.textContent = 'Economisirea individuală moderată este sănătoasă și nu perturbă sistemul.';
+
+  } else if (v <= 40) {
+    flowsEl.innerHTML = `
+      <div class="flow">
+        <div class="fb fg">Toți economisesc</div>
+        <div class="fa">→</div>
+        <div class="fb fr">Cererea scade cu ${consumDrop}%</div>
+      </div>
+      <div class="flow">
+        <div class="fb fr">Vânzări în scădere</div>
+        <div class="fa">→</div>
+        <div class="fb fr">Concedieri (+${somaj}% șomaj)</div>
+      </div>`;
+    insightEl.className = 'insight i-key';
+    insightEl.textContent = 'Paradoxul apare: fiecare decizie individuală e rațională, dar suma lor dăunează tuturor — inclusiv celor care economisesc.';
+
+  } else if (v <= 70) {
+    flowsEl.innerHTML = `
+      <div class="flow">
+        <div class="fb fr">Cerere colapsată −${consumDrop}%</div>
+        <div class="fa">→</div>
+        <div class="fb fr">Companii reduc producția</div>
+      </div>
+      <div class="flow">
+        <div class="fb fr">Șomaj +${somaj}%</div>
+        <div class="fa">→</div>
+        <div class="fb fr">Venituri mai mici → economii mai mici</div>
+      </div>`;
+    insightEl.className = 'insight i-bad';
+    insightEl.textContent = 'Ironia paradoxului: cu cât încearcă mai mult să economisească, cu atât au mai puțin de economisit — veniturile le scad.';
+
+  } else {
+    flowsEl.innerHTML = `
+      <div class="flow">
+        <div class="fb fr">Cerere practic dispărută</div>
+        <div class="fa">→</div>
+        <div class="fb fr">Economie în spirală descendentă</div>
+      </div>
+      <div class="flow">
+        <div class="fb fr">PIB −${pibDrop}%</div>
+        <div class="fa">→</div>
+        <div class="fb fr">Criză generalizată</div>
+      </div>`;
+    insightEl.className = 'insight i-bad';
+    insightEl.textContent = 'Scenariul Marii Depresiuni (1929–1933). Soluția Keynesiană: statul cheltuiește când sectorul privat refuză — pentru a compensa cererea lipsă.';
+  }
+}
+
+update();
+</script>
+</body>
+</html>
